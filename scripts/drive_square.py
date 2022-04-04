@@ -23,7 +23,7 @@ class Square(object):
                 self.vel_pub.publish(go_for)
                 r.sleep()
             turn = Twist()
-            turn.angular.z = 1.57 / 2
+            turn.angular.z = 0.785 #45 degrees/s
             for _ in range(10):
                 self.vel_pub.publish(turn)
                 r.sleep()
