@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-from soupsieve import closest
 import rospy
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import LaserScan
@@ -51,6 +50,7 @@ class PersonFollower(object):
             avg_ang += angle
         avg_ang = avg_ang / 3
 
+        #based on avg_ang set angualr velocity to turn faster or slower
         if avg_ang < 180: #turn left
             print('turning left')
             self.twist.linear.x=0
