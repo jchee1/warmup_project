@@ -15,11 +15,16 @@ class PersonFollower(object):
         self.twist = Twist()
 
     def process_point(self, data):
-        #go through ranges and see where value is less than 5
-        #index of that value in ranges list correspond to angle we need to change 
 
+        #check to stop robot if close enough
+        if data.ranges[0] <= 0.4 and data.ranges[0] > 0.0:  
+            print("stop")    
+            self.twist.linear.x = 0.0
+            self.twist.angular.z = 0
+            self.vel_pub.publish(self.twist)
+            return
+        
         #check to see if straight ahead, if it is, then just go forward
-        #print("ranges:", data.ranges)
         if data.ranges[0] <= 2.0 and data.ranges[0] > 0.0:  
             print("moving forward")    
             self.twist.linear.x = 0.3
@@ -37,50 +42,48 @@ class PersonFollower(object):
                 closest.append(i)
         print("Closest:", closest)
 
+        #to help control for noise, take avg distance and angles of 3 smallest ranges
+        avg_closest = sum(closest) / 3
+        avg_ang = 0
+
         for dist in closest:
             angle = data.ranges.index(dist)
-            if angle < 180:
-                    print('turning left')
-                    self.twist.linear.x=0
-                    if angle <= 30: 
-                        self.twist.angular.z = 0.1
-                    elif angle <= 60:
-                        self.twist.angular.z = 0.3
-                    elif angle <= 90:
-                        self.twist.angular.z = 0.5
-                    elif angle <= 120:
-                        self.twist.angular.z = 0.7
-                    elif angle <= 150:
-                        self.twist.angular.z = 0.9
-                    else:
-                        self.twist.angular.z = 1.0
+            avg_ang += angle
+        avg_ang = avg_ang / 3
+
+        if avg_ang < 180: #turn left
+            print('turning left')
+            self.twist.linear.x=0
+            if avg_ang <= 30: 
+                self.twist.angular.z = 0.3
+            elif avg_ang <= 60:
+                self.twist.angular.z = 0.5
+            elif avg_ang <= 90:
+                self.twist.angular.z = 0.7
+            elif avg_ang <= 120:
+                self.twist.angular.z = 0.9
+            elif avg_ang <= 150:
+                self.twist.angular.z = 1.1
+            else:
+                self.twist.angular.z = 1.3
                 
-            else: #turn right
-                print("turning right")
-                self.twist.linear.x=0
-                if angle <= 210: 
-                    self.twist.angular.z = -0.1
-                elif angle <= 240:
-                    self.twist.angular.z = -0.3
-                elif angle <= 270:
-                    self.twist.angular.z = -0.5
-                elif angle <= 300:
-                    self.twist.angular.z = -0.7
-                elif angle <= 330:
-                    self.twist.angular.z = -0.9
-                else:
-                    self.twist.angular.z = -1.0
-            self.vel_pub.publish(self.twist)
-            return
-
-
-        
-        print("nothing in range")
-        #case where nothing is in range => just move forward
-        self.twist.linear.x = 0.3
+        else: #turn right
+            print("turning right")
+            self.twist.linear.x=0
+            if avg_ang <= 210: 
+                self.twist.angular.z = -0.3
+            elif avg_ang <= 240:
+                self.twist.angular.z = -0.5
+            elif avg_ang <= 270:
+                self.twist.angular.z = -0.7
+            elif avg_ang <= 300:
+                self.twist.angular.z = -0.9
+            elif avg_ang <= 330:
+                self.twist.angular.z = -1.1
+            else:
+                self.twist.angular.z = -1.3
         self.vel_pub.publish(self.twist)
-
-        #TODO: stop at certain dist from person
+        
 
     def run(self):
         rospy.spin()
