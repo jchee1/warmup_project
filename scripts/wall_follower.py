@@ -12,16 +12,15 @@ class WallFollower(object):
         rospy.init_node('wall_follow')
         self.vel_pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
         self.scan_sub = rospy.Subscriber('/scan', LaserScan, self.callback)
-        self.twist = Twist()
         
 
     def callback(self, data):
 
-        distance = 0.3
+        distance = 0.4
         front_ranges = data.ranges[0:10] + data.ranges[350:360]
         left_ranges = data.ranges[80:110]
-        fm = np.min(front_ranges[np.nonzero(front_ranges)]) #FIX to do nonzero
-        lm = min(left_ranges[np.nonzero(left_ranges)])
+        #fm = np.min(front_ranges[np.nonzero(front_ranges)]) #FIX to do nonzero
+        #lm = min(left_ranges[np.nonzero(left_ranges)])
         #turn 
         if data.ranges[0] <= distance+0.05 and data.ranges[0] >= distance-0.05 and data.ranges[0] > 0.0:
             print("something ahead, turning left")
@@ -63,8 +62,14 @@ class WallFollower(object):
             avg_ang += angle
         avg_ang = avg_ang // len(closest)
 
-
-        move.angular.z = -(90 - avg_ang) * 0.05
+        move.angular.z = -(90 - avg_ang) * 0.03
+        '''
+        proportional_control = -(90 - avg_ang) * 0.03
+        if proportional_control < 0:
+            move.angular.z = proportional_control
+        else:
+            move.angular.z = -proportional_control
+        '''
         print("linear x:", move.linear.x)
         print("angular z:", move.angular.z)
 
