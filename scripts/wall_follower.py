@@ -17,22 +17,20 @@ class WallFollower(object):
     def callback(self, data):
 
         distance = 0.4
-        front_ranges = data.ranges[0:10] + data.ranges[350:360]
-        left_ranges = data.ranges[80:110]
-        #fm = np.min(front_ranges[np.nonzero(front_ranges)]) #FIX to do nonzero
-        #lm = min(left_ranges[np.nonzero(left_ranges)])
-        #turn 
-        if data.ranges[0] <= distance+0.05 and data.ranges[0] >= distance-0.05 and data.ranges[0] > 0.0:
-            print("something ahead, turning left")
-            move = Twist()
 
+        #TODO: figure out what robot should do to find wall
+
+        #turn on inward corner
+        if data.ranges[0] <= distance + 0.05 and data.ranges[0] >= distance - 0.05 and data.ranges[0] > 0.0:
+            print("something ahead, turning right")
+            move = Twist()
             move.linear.x = 0
-            move.angular.z = -0.2
+            move.angular.z = -0.6
             self.vel_pub.publish(move)
             return
-        #follow along wall
-        if data.ranges[90] <= distance+0.05 and data.ranges[90] >= distance-0.05 and data.ranges[90] > 0.0:
-            print("something ahead, turning left")
+        #follow along wall that's on left side
+        if data.ranges[90] <= distance + 0.05 and data.ranges[90] >= distance - 0.05 and data.ranges[90] > 0.0:
+            print("following wall")
             move = Twist()
             move.linear.x = 0.1
             move.angular.z = 0
@@ -40,7 +38,7 @@ class WallFollower(object):
             return
         
         move = Twist()
-        move.linear.x = 0.1
+        
         
         #logic to get avg closest from scan
         sort_ranges = sorted(data.ranges)
@@ -60,17 +58,19 @@ class WallFollower(object):
         for dist in closest:
             angle = data.ranges.index(dist)
             avg_ang += angle
-        avg_ang = avg_ang // len(closest)
+        avg_ang = avg_ang / len(closest)
 
-        move.angular.z = -(90 - avg_ang) * 0.03
-        '''
-        proportional_control = -(90 - avg_ang) * 0.03
-        if proportional_control < 0:
-            move.angular.z = proportional_control
-        else:
-            move.angular.z = -proportional_control
-        '''
-        print("linear x:", move.linear.x)
+        move.linear.x = 0.15
+        if avg_ang > 90 and avg_ang < 180:
+            print("cond: in corner turns")
+            move.linear.x = 0.1
+            #move.angular.z = 0.6
+        
+        #proportional control
+        move.angular.z = -(90 - avg_ang) * 0.08
+        
+        #print("linear x:", move.linear.x)
+        print("avg_ang:", avg_ang)
         print("angular z:", move.angular.z)
 
         self.vel_pub.publish(move)
