@@ -17,9 +17,6 @@ class WallFollower(object):
     def callback(self, data):
 
         distance = 0.4
-
-        #TODO: figure out what robot should do to find wall
-
         #turn on inward corner
         if data.ranges[0] <= distance + 0.05 and data.ranges[0] >= distance - 0.05 and data.ranges[0] > 0.0:
             print("something ahead, turning right")
@@ -38,8 +35,7 @@ class WallFollower(object):
             return
         
         move = Twist()
-        
-        
+           
         #logic to get avg closest from scan
         sort_ranges = sorted(data.ranges)
         closest = []
@@ -64,12 +60,10 @@ class WallFollower(object):
         if avg_ang > 90 and avg_ang < 180:
             print("cond: in corner turns")
             move.linear.x = 0.1
-            #move.angular.z = 0.6
         
         #proportional control
         move.angular.z = -(90 - avg_ang) * 0.08
         
-        #print("linear x:", move.linear.x)
         print("avg_ang:", avg_ang)
         print("angular z:", move.angular.z)
 

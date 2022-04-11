@@ -20,3 +20,24 @@ Essentially all of my logic is in the process_point function, which is the callb
 
 https://user-images.githubusercontent.com/60594579/162107616-f8812ea1-cd37-4fd1-8dd8-561863e7b7d8.mov
 
+Wall follower:
+
+The task was to have the turtlebot navigate close to the wall and drive alongside it while handling corners. My approach was to use proportional control (Kp*e(t)) on the angular velocity. I wanted the bot to follow the wall on its left side. The error difference is then the difference between the desired angle of the closest object of the bot, which is 90, and the sensor angle. I set the Kp constant to an arbitrary value and updated it as I tested it. 
+
+Again, all of my logic is in the callback function for the \scan subscriber. The first conditional checks if something is directly in front of the turtlebot (within distance of 0.40 and 0.50). If there is, the bot would stop and turn right. This conditional is for handling the case if the bot has to make an inward corner turn. The second conditional checks if something is directly to the left of the bot, which is for handling the case of following the wall. If there is, the angular velocity would be 0 and would just move forward. The next portion is the same as person_follower of getting the average closest distance and angle from the ranges scan. I then have another conditional to check if the angle of the average closest distance is between 90 and 180, which would then slow down the bots linear velocity. This is to help the bot handle outward corners. Finally, the proportional control is then used to set the bot's angular velocity.
+
+
+
+Challenges:
+
+I found the main challenge of this project was understanding the ranges of the data for person and wall follower and how those ranges would affect the turtlebot's movement. When I first started working on the calback function for the \scan with the person follower, I tried to go through each of the ranges in a for loop, but I realized I only need the smallest nonzero value of the range list. Thus, I then implemented my logic for getting the average closest distance and angle. 
+
+Future work:
+
+For the person follower, my current implementation stops and whenever it turns. I would like to improve upon it by doing smooth turns (i.e. the turtlebot would not stop whenever it turns to face the person). For the wall follower, I only have the bot follow the wall if it's on the left side, but I would've liked to impelement a more generic script that could apply to both if the wall was on the left and right side. 
+
+Takeaways:
+
+One of my takeaways from the project is working in bject-oriented programming in ROS. This was especially useful when organizing the callback function for the \scan subscriber and when coding more complex behavior in future projects.
+
+Another takeaway was working with the \scan and the \cmd_vel topics. THese were essential as they controlled how the turtlebot moves and the sensor readings which would affect the turtlebot's actions. 
