@@ -1,6 +1,7 @@
 # warmup_project
 
 Drive_square:
+
 The task was to get the turtlebot to drive in a square path. My approach
 was to use a timing method: it would move forward for a couple of seconds
 and then it would make a 90 degree turn and then repeat.
@@ -26,6 +27,7 @@ The task was to have the turtlebot navigate close to the wall and drive alongsid
 
 Again, all of my logic is in the callback function for the \scan subscriber. The first conditional checks if something is directly in front of the turtlebot (within distance of 0.40 and 0.50). If there is, the bot would stop and turn right. This conditional is for handling the case if the bot has to make an inward corner turn. The second conditional checks if something is directly to the left of the bot, which is for handling the case of following the wall. If there is, the angular velocity would be 0 and would just move forward. The next portion is the same as person_follower of getting the average closest distance and angle from the ranges scan. I then have another conditional to check if the angle of the average closest distance is between 90 and 180, which would then slow down the bots linear velocity. This is to help the bot handle outward corners. Finally, the proportional control is then used to set the bot's angular velocity.
 
+https://user-images.githubusercontent.com/60594579/162874624-c031c67b-9b33-4a52-bc39-873979c93f19.mov
 
 
 Challenges:
